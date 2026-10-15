@@ -672,46 +672,186 @@ body.hub-page {
   overflow: auto;
   height: auto;
 }
+body.hub-page {
+  background: #f3f8ec;
+}
 .hub {
-  max-width: 880px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 12px 16px 16px;
+  padding: 14px 16px 16px;
+}
+.hub-head {
+  display: flex;
+  align-items: center;
+}
+.hub-pip {
+  font-size: 46px;
+  margin-right: 12px;
+  line-height: 1;
 }
 .hub h1 {
-  font-weight: normal;
-  margin-top: 0;
+  font-size: 32px;
+  margin: 0;
+}
+.hub-tagline {
+  margin: 2px 0 0;
+  color: #5a6b4a;
+  font-size: 16px;
 }
 .hub-intro {
   font-size: 17px;
   line-height: 1.4;
+  margin: 10px 0 6px;
 }
-.game-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
-  margin-top: 16px;
+
+/* The path: stops zigzag left and right along a dashed trail. */
+.path {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0 0;
+  position: relative;
 }
-.game-card {
+.path::before {
+  content: '';
+  position: absolute;
+  top: 30px;
+  bottom: 22px;
+  left: 50%;
+  margin-left: -4px;
+  border-left: 8px dashed #c9a46b;
+}
+.path-stop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 50%;
+  margin-bottom: 8px;
+}
+.path-stop:nth-child(odd) {
+  flex-direction: row-reverse;
+}
+.path-stop:nth-child(even) {
+  margin-left: 50%;
+}
+.path-badge {
+  flex: none;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid #c9a46b;
+  font-size: 30px;
+  line-height: 58px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.path-stop:nth-child(odd) .path-badge {
+  margin-right: -33px;
+}
+.path-stop:nth-child(even) .path-badge {
+  margin-left: -33px;
+}
+.path-card {
+  flex: 1 1 auto;
+  background: #fff;
   border: 1px solid #ddd;
   border-radius: 12px;
-  padding: 14px;
-  background: #fff;
+  padding: 10px 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
-.game-card h2 {
-  margin: 0 0 6px;
-  font-weight: normal;
+.path-stop:nth-child(odd) .path-card {
+  margin-right: 16px;
 }
-.game-card p {
+.path-stop:nth-child(even) .path-card {
+  margin-left: 16px;
+}
+.path-step {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a6a35;
+}
+.path-card h2 {
+  margin: 2px 0 4px;
+  font-size: 22px;
+}
+.path-card p {
   line-height: 1.4;
-  margin-top: 0;
+  margin: 0 0 6px;
+  font-size: 15px;
 }
-.game-card a.play {
+.path-progress {
+  color: #666;
+  font-size: 13px;
+}
+.path-card a.play {
   display: inline-block;
   background: #dd4b39;
   color: #fff;
   text-decoration: none;
   border-radius: 4px;
-  padding: 9px 12px;
+  padding: 7px 12px;
+}
+.path-stop.is-next .path-badge {
+  border-color: #dd4b39;
+  box-shadow: 0 0 0 5px rgba(221, 75, 57, 0.18);
+}
+.path-stop.is-next .path-step::after {
+  content: ' · Start here';
+  color: #dd4b39;
+}
+.path-stop.is-done .path-badge {
+  border-color: #2fbf71;
+}
+.path-stop.is-done .path-card a.play {
+  background: #888;
+}
+.path-end {
+  position: relative;
+  z-index: 1;
+  width: 50px;
+  margin: 0 auto;
+  font-size: 34px;
+  text-align: center;
+}
+.hub-foot {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #dde5d2;
+  color: #777;
+  font-size: 13px;
+  text-align: center;
+}
+.hub-foot a {
+  color: #5a7d3a;
+}
+@media (max-width: 620px) {
+  .path::before {
+    left: 33px;
+  }
+  .path-stop,
+  .path-stop:nth-child(even) {
+    width: auto;
+    margin-left: 0;
+    flex-direction: row;
+  }
+  .path-stop:nth-child(odd) {
+    flex-direction: row;
+  }
+  .path-stop:nth-child(odd) .path-badge,
+  .path-stop:nth-child(even) .path-badge {
+    margin: 0;
+  }
+  .path-stop:nth-child(odd) .path-card,
+  .path-stop:nth-child(even) .path-card {
+    margin: 0 0 0 12px;
+  }
+  .path-end {
+    margin: 0 0 0 8px;
+  }
 }
 @media (max-width: 760px) {
   #play {

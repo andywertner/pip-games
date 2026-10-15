@@ -82,7 +82,7 @@ function pageShell(config, level, levelNum, openMax) {
     <div id="page">
       <header>
         <h1>
-          <a href="index.html">Blockly Games</a> : ${esc(config.title)}
+          <a href="index.html">🤖 Pip's Jobs</a> : ${config.emoji ? `${config.emoji} ` : ''}${esc(config.title)}
           <span class="levels">${dots}</span>
         </h1>
       </header>

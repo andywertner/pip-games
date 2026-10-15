@@ -210,7 +210,7 @@
     <div id="page">
       <header>
         <h1>
-          <a href="index.html">Blockly Games</a> : ${esc(config.title)}
+          <a href="index.html">\u{1F916} Pip's Jobs</a> : ${config.emoji ? `${config.emoji} ` : ""}${esc(config.title)}
           <span class="levels">${dots}</span>
         </h1>
       </header>
@@ -1008,7 +1008,7 @@
       if (fields.includes("asked")) bits.push(`<span class="fact ${item.asked ? "good" : "bad"}">We asked: ${askedLabel(item.asked)}</span>`);
       if (fields.includes("check")) bits.push(`<span class="fact ${item.check === "pass" ? "good" : "bad"}">Check: ${item.check === "pass" ? "Passed" : "Failed"}</span>`);
       if (fields.includes("exact")) bits.push(`<span class="fact ${item.exact ? "good" : "bad"}">Exact: ${item.exact ? "Yes" : "No"}</span>`);
-      const stamp = item.stamp === "yes" ? '<span class="stamp yes">YES</span>' : item.stamp === "no" ? '<span class="stamp no">PUT IT BACK</span>' : '<span class="stamp empty">no stamp</span>';
+      const stamp = item.stamp === "yes" ? '<span class="stamp yes">\u2705 YES</span>' : item.stamp === "no" ? '<span class="stamp no">\u21A9\uFE0F PUT IT BACK</span>' : '<span class="stamp empty">no stamp</span>';
       const here = index === state.cursor ? " here" : "";
       return `
       <article class="change-card${here}">
@@ -1032,6 +1032,7 @@
     id: "stamps",
     file: "stamps.html",
     title: "Stamps",
+    emoji: "\u{1F4CB}",
     about: "Pip already changed the clubhouse. Stamp yes on changes you want to keep, and put the rest back, until only the changes you asked for remain.",
     realLife: "An AI helper often changes a project before you look. Some changes are what you asked for, and some only look helpful. Checking before you keep them is part of the job.",
     levels: stampLevels,

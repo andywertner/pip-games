@@ -7,6 +7,7 @@ mountGame({
   id: 'sign',
   file: 'sign.html',
   title: 'Sign',
+  emoji: '🎨',
   about: 'Pip paints whatever your note says. Make the street match the challenge, with everything else left alone.',
   realLife: 'When people use an AI helper to write code, the helper does what their note says. A vague note can change things they never asked for, and a short exact note keeps the helper on the job.',
   levels: signLevels,

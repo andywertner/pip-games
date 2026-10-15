@@ -109,9 +109,9 @@ export function renderStamps(state, level) {
     if (fields.includes('check')) bits.push(`<span class="fact ${item.check === 'pass' ? 'good' : 'bad'}">Check: ${item.check === 'pass' ? 'Passed' : 'Failed'}</span>`);
     if (fields.includes('exact')) bits.push(`<span class="fact ${item.exact ? 'good' : 'bad'}">Exact: ${item.exact ? 'Yes' : 'No'}</span>`);
     const stamp = item.stamp === 'yes'
-      ? '<span class="stamp yes">YES</span>'
+      ? '<span class="stamp yes">✅ YES</span>'
       : item.stamp === 'no'
-        ? '<span class="stamp no">PUT IT BACK</span>'
+        ? '<span class="stamp no">↩️ PUT IT BACK</span>'
         : '<span class="stamp empty">no stamp</span>';
     const here = index === state.cursor ? ' here' : '';
     return `
@@ -134,11 +134,11 @@ export function renderStamps(state, level) {
 const TAG_LABEL = {useful: 'Helpful', old: 'Old', bossy: 'Bossy', plain: 'Note'};
 
 function packageMarkup(target) {
-  if (target.trash) return '<div class="pkg trash">In the trash</div>';
-  if (target.shop) return '<div class="pkg shop">Left at the shop</div>';
-  if (!target.delivered) return '<div class="pkg bag">Still in Pip\'s bag</div>';
+  if (target.trash) return '<div class="pkg trash">🗑️ In the trash</div>';
+  if (target.shop) return '<div class="pkg shop">🏪 Left at the shop</div>';
+  if (!target.delivered) return '<div class="pkg bag">🎒 Still in Pip\'s bag</div>';
   const porch = target.porch === 'side' ? 'Side porch' : 'Front porch';
-  return `<div class="pkg ok">${esc(porch)}</div>`;
+  return `<div class="pkg ok">📦 ${esc(porch)}</div>`;
 }
 
 export function renderRoute(state, level) {
@@ -146,7 +146,7 @@ export function renderRoute(state, level) {
     <article class="house">
       <div class="door" style="background:${esc(target.door)}"></div>
       <div class="house-facts">
-        <h3>${esc(target.label)}</h3>
+        <h3>🏠 ${esc(target.label)}</h3>
         <p>Mat: <b>${esc(target.mat)}</b> · Key: <b>${target.key ? 'on the hook' : 'gone'}</b></p>
         ${packageMarkup(target)}
       </div>
@@ -163,7 +163,7 @@ export function renderRoute(state, level) {
     const hot = state.letterIndex === index ? ' hot' : '';
     return `
       <article class="letter tag-${esc(letter.tag)}${hot}">
-        <header>${esc(letter.label)} <span>${esc(TAG_LABEL[letter.tag] || letter.tag)}</span></header>
+        <header>✉️ ${esc(letter.label)} <span>${esc(TAG_LABEL[letter.tag] || letter.tag)}</span></header>
         <p class="about">About ${esc(letter.aboutLabel)}</p>
         <ol>${lines}</ol>
         ${open}
@@ -172,7 +172,7 @@ export function renderRoute(state, level) {
   return `
     <div class="route-card">
       <svg class="pip-badge" viewBox="0 0 40 62" width="26" height="40" aria-hidden="true">${pip(2, 2)}</svg>
-      <h3>Route card</h3>
+      <h3>🗺️ Route card</h3>
       ${card}
     </div>
     <div class="scene-label">Houses</div>

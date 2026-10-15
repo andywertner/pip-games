@@ -210,7 +210,7 @@
     <div id="page">
       <header>
         <h1>
-          <a href="index.html">Blockly Games</a> : ${esc(config.title)}
+          <a href="index.html">\u{1F916} Pip's Jobs</a> : ${config.emoji ? `${config.emoji} ` : ""}${esc(config.title)}
           <span class="levels">${dots}</span>
         </h1>
       </header>
@@ -1073,6 +1073,7 @@
     id: "sign",
     file: "sign.html",
     title: "Sign",
+    emoji: "\u{1F3A8}",
     about: "Pip paints whatever your note says. Make the street match the challenge, with everything else left alone.",
     realLife: "When people use an AI helper to write code, the helper does what their note says. A vague note can change things they never asked for, and a short exact note keeps the helper on the job.",
     levels: signLevels,

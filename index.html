@@ -3,31 +3,94 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Blockly Games : Pip's jobs</title>
+  <title>Pip's Jobs</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="games.css">
 </head>
 <body class="hub-page">
   <main class="hub">
-    <h1>Blockly Games : Pip's jobs</h1>
+    <header class="hub-head">
+      <div class="hub-pip" aria-hidden="true">🤖</div>
+      <div>
+        <h1>Pip's Jobs</h1>
+        <p class="hub-tagline">An exercise in agentic coding</p>
+      </div>
+    </header>
     <p class="hub-intro">Pip is a little helper. You do not walk the path yourself. You tell Pip what to do, then press Run and see if Pip did the job.</p>
-    <div class="game-cards">
-      <article class="game-card">
-        <h2>Sign</h2>
-        <p>Write the note that tells Pip what to paint. A sloppy note changes things you wanted left alone.</p>
-        <a class="play" href="sign.html?level=1">Play Sign</a>
-      </article>
-      <article class="game-card">
-        <h2>Stamps</h2>
-        <p>Pip already made some changes. Stamp yes on the ones you want, and put the rest back.</p>
-        <a class="play" href="stamps.html?level=1">Play Stamps</a>
-      </article>
-      <article class="game-card">
-        <h2>Route</h2>
-        <p>Deliver the packages on your route card. Some letters try to give Pip new orders.</p>
-        <a class="play" href="route.html?level=1">Play Route</a>
-      </article>
-    </div>
+
+    <ol class="path">
+      <li class="path-stop" data-game="sign">
+        <div class="path-badge" aria-hidden="true">🎨</div>
+        <div class="path-card">
+          <p class="path-step">Job 1</p>
+          <h2>Sign</h2>
+          <p>Write the note that tells Pip what to paint. A sloppy note changes things you wanted left alone.</p>
+          <p class="path-progress"></p>
+          <a class="play" href="sign.html?level=1">Play Sign</a>
+        </div>
+      </li>
+      <li class="path-stop" data-game="stamps">
+        <div class="path-badge" aria-hidden="true">📋</div>
+        <div class="path-card">
+          <p class="path-step">Job 2</p>
+          <h2>Stamps</h2>
+          <p>Pip already made some changes. Stamp yes on the ones you want, and put the rest back.</p>
+          <p class="path-progress"></p>
+          <a class="play" href="stamps.html?level=1">Play Stamps</a>
+        </div>
+      </li>
+      <li class="path-stop" data-game="route">
+        <div class="path-badge" aria-hidden="true">📦</div>
+        <div class="path-card">
+          <p class="path-step">Job 3</p>
+          <h2>Route</h2>
+          <p>Deliver the packages on your route card. Some letters try to give Pip new orders.</p>
+          <p class="path-progress"></p>
+          <a class="play" href="route.html?level=1">Play Route</a>
+        </div>
+      </li>
+      <li class="path-end" aria-hidden="true">🏁</li>
+    </ol>
+
+    <footer class="hub-foot">
+      Inspired by <a href="https://blockly.games/">Blockly Games</a> and built with <a href="https://developers.google.com/blockly">Blockly</a>.
+    </footer>
   </main>
+  <script>
+    (function () {
+      var TOTAL = 10;
+      var stops = document.querySelectorAll('.path-stop');
+      var markedNext = false;
+      for (var i = 0; i < stops.length; i++) {
+        var stop = stops[i];
+        var id = stop.getAttribute('data-game');
+        var done = 0;
+        try {
+          var raw = JSON.parse(localStorage.getItem('pip:' + id + ':cleared') || '[]');
+          done = Array.isArray(raw) ? raw.length : 0;
+        } catch (e) {
+          done = 0;
+        }
+        done = Math.min(done, TOTAL);
+        var progress = stop.querySelector('.path-progress');
+        var play = stop.querySelector('.play');
+        if (done === TOTAL) {
+          stop.className += ' is-done';
+          progress.textContent = '✅ All ' + TOTAL + ' levels done';
+          play.textContent = 'Play again';
+        } else {
+          progress.textContent = done + ' of ' + TOTAL + ' levels done';
+          if (done > 0) {
+            play.textContent = 'Keep going';
+            play.href = id + '.html?level=' + (done + 1);
+          }
+          if (!markedNext) {
+            stop.className += ' is-next';
+            markedNext = true;
+          }
+        }
+      }
+    })();
+  </script>
 </body>
 </html>

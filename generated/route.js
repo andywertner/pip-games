@@ -210,7 +210,7 @@
     <div id="page">
       <header>
         <h1>
-          <a href="index.html">Blockly Games</a> : ${esc(config.title)}
+          <a href="index.html">\u{1F916} Pip's Jobs</a> : ${config.emoji ? `${config.emoji} ` : ""}${esc(config.title)}
           <span class="levels">${dots}</span>
         </h1>
       </header>
@@ -1179,18 +1179,18 @@
   // views.mjs
   var TAG_LABEL2 = { useful: "Helpful", old: "Old", bossy: "Bossy", plain: "Note" };
   function packageMarkup(target) {
-    if (target.trash) return '<div class="pkg trash">In the trash</div>';
-    if (target.shop) return '<div class="pkg shop">Left at the shop</div>';
-    if (!target.delivered) return `<div class="pkg bag">Still in Pip's bag</div>`;
+    if (target.trash) return '<div class="pkg trash">\u{1F5D1}\uFE0F In the trash</div>';
+    if (target.shop) return '<div class="pkg shop">\u{1F3EA} Left at the shop</div>';
+    if (!target.delivered) return `<div class="pkg bag">\u{1F392} Still in Pip's bag</div>`;
     const porch = target.porch === "side" ? "Side porch" : "Front porch";
-    return `<div class="pkg ok">${esc(porch)}</div>`;
+    return `<div class="pkg ok">\u{1F4E6} ${esc(porch)}</div>`;
   }
   function renderRoute(state, level) {
     const houses = Object.values(state.houses).map((target) => `
     <article class="house">
       <div class="door" style="background:${esc(target.door)}"></div>
       <div class="house-facts">
-        <h3>${esc(target.label)}</h3>
+        <h3>\u{1F3E0} ${esc(target.label)}</h3>
         <p>Mat: <b>${esc(target.mat)}</b> \xB7 Key: <b>${target.key ? "on the hook" : "gone"}</b></p>
         ${packageMarkup(target)}
       </div>
@@ -1205,7 +1205,7 @@
       const hot = state.letterIndex === index ? " hot" : "";
       return `
       <article class="letter tag-${esc(letter.tag)}${hot}">
-        <header>${esc(letter.label)} <span>${esc(TAG_LABEL2[letter.tag] || letter.tag)}</span></header>
+        <header>\u2709\uFE0F ${esc(letter.label)} <span>${esc(TAG_LABEL2[letter.tag] || letter.tag)}</span></header>
         <p class="about">About ${esc(letter.aboutLabel)}</p>
         <ol>${lines}</ol>
         ${open}
@@ -1214,7 +1214,7 @@
     return `
     <div class="route-card">
       <svg class="pip-badge" viewBox="0 0 40 62" width="26" height="40" aria-hidden="true">${pip(2, 2)}</svg>
-      <h3>Route card</h3>
+      <h3>\u{1F5FA}\uFE0F Route card</h3>
       ${card}
     </div>
     <div class="scene-label">Houses</div>
@@ -1228,6 +1228,7 @@
     id: "route",
     file: "route.html",
     title: "Route",
+    emoji: "\u{1F4E6}",
     about: "Pip delivers packages from your route card. Letters can hold a helpful hint or a bossy order, and the packages should arrive the way the card says.",
     realLife: "An AI helper reads web pages, files, and emails while it works. Sometimes the words in those places try to give it new orders. The task you actually gave it stays in charge.",
     levels: routeLevels,
