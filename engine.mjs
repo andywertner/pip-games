@@ -97,6 +97,12 @@ function pageShell(config, level, levelNum, openMax) {
             <button id="reset" type="button">Reset</button>
             <button id="start-over" type="button">Start over</button>
             <span id="capacity"></span>
+            <button id="teacher" type="button" aria-label="Teacher answer" title="Teacher answer">
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                <path d="M8 2.2 L14.2 6 L8 9.8 L1.8 6 Z" fill="none" stroke="currentColor" stroke-width="1.3"/>
+                <path d="M4.2 7.6 V11 Q8 13 11.8 11 V7.6" fill="none" stroke="currentColor" stroke-width="1.3"/>
+              </svg>
+            </button>
           </div>
         </div>
         <div id="blockly-column"><div id="blockly"></div></div>
@@ -113,6 +119,17 @@ function pageShell(config, level, levelNum, openMax) {
           <button id="outcome-ok" type="button">OK</button>
           <a id="outcome-next" class="next-link" hidden href="${next}">${nextLabel}</a>
         </div>
+      </div>
+      <div id="teacher-shadow" hidden></div>
+      <div id="teacher-box" role="dialog" aria-modal="true" aria-labelledby="teacher-title" hidden>
+        <div id="teacher-title">Teacher answer</div>
+        <p id="teacher-text">Enter the teacher password to fill in this level.</p>
+        <p id="teacher-error" hidden>That password did not work.</p>
+        <form id="teacher-form">
+          <label for="teacher-password">Password</label>
+          <input id="teacher-password" type="password" autocomplete="off" spellcheck="false">
+          <button type="submit">Show</button>
+        </form>
       </div>
       <div id="lock-shadow" hidden></div>
       <div id="lock-box" role="dialog" aria-modal="true" aria-labelledby="lock-title" hidden>
@@ -376,9 +393,69 @@ export function mountGame(config) {
     unlockThrough(config, lockTarget);
     location.href = `${config.file}?level=${lockTarget}`;
   });
+  const teacherShadow = document.getElementById('teacher-shadow');
+  const teacherBox = document.getElementById('teacher-box');
+  const teacherForm = document.getElementById('teacher-form');
+  const teacherError = document.getElementById('teacher-error');
+  const teacherReady = () => sessionStorage.getItem('pip:teacher') === 'yes';
+  const hideTeacher = () => {
+    teacherBox.hidden = true;
+    teacherShadow.hidden = true;
+    teacherError.hidden = true;
+    document.getElementById('teacher-password').value = '';
+  };
+  const loadAnswer = () => {
+    const solution = config.solutions[levelNum - 1];
+    loading = true;
+    Blockly.Events.setGroup(true);
+    for (const block of workspace.getTopBlocks(false)) block.dispose(false);
+    const note = realize(workspace, {type: 'pip_note', next: solution});
+    note.moveBy(24, 24);
+    note.setDeletable(false);
+    Blockly.Events.setGroup(false);
+    loading = false;
+    picture = config.begin(level);
+    workspace.highlightBlock(null);
+    hideOutcome();
+    draw();
+    showCapacity();
+    try {
+      localStorage.setItem(
+          storageKey(config, levelNum),
+          JSON.stringify(Blockly.serialization.workspaces.save(workspace)));
+    } catch (error) {
+      // Ignore private-mode storage failures.
+    }
+    chat('pip', 'Teacher answer is on the note. Press Run when you want to watch it.');
+  };
+  document.getElementById('teacher').addEventListener('click', () => {
+    if (running) return;
+    if (teacherReady()) {
+      loadAnswer();
+      return;
+    }
+    teacherError.hidden = true;
+    document.getElementById('teacher-password').value = '';
+    teacherBox.hidden = false;
+    teacherShadow.hidden = false;
+    document.getElementById('teacher-password').focus();
+  });
+  teacherShadow.addEventListener('click', hideTeacher);
+  teacherForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (document.getElementById('teacher-password').value !== 'admin') {
+      teacherError.hidden = false;
+      document.getElementById('teacher-password').focus();
+      return;
+    }
+    sessionStorage.setItem('pip:teacher', 'yes');
+    hideTeacher();
+    loadAnswer();
+  });
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
     if (!lockBox.hidden) hideLock();
+    if (!teacherBox.hidden) hideTeacher();
     hideOutcome();
   });
   const showCapacity = () => {

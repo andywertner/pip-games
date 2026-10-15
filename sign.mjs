@@ -1,3 +1,4 @@
+import {signSolutions} from './answers.mjs';
 import {mountGame} from './engine.mjs';
 import {runProgram} from './program.mjs';
 import {beginSign, checkSign, signHandlers, signLevels} from './sign-rules.mjs';
@@ -11,6 +12,7 @@ mountGame({
   about: 'Pip paints whatever your note says. Make the street match the challenge, with everything else left alone.',
   realLife: 'When people use an AI helper to write code, the helper does what their note says. A vague note can change things they never asked for, and a short exact note keeps the helper on the job.',
   levels: signLevels,
+  solutions: signSolutions,
   begin: beginSign,
   check: checkSign,
   render: renderSign,

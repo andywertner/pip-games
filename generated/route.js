@@ -1,4 +1,116 @@
 (() => {
+  // answers.mjs
+  function b(type, fields = {}, inputs = {}) {
+    return { type, fields, inputs, next: null };
+  }
+  function chain(nodes) {
+    for (let i = 0; i < nodes.length - 1; i++) nodes[i].next = nodes[i + 1];
+    return nodes[0];
+  }
+  var signSolutions = [
+    b("sign_words", { WORD: "PLAY" }),
+    chain([b("sign_words", { WORD: "PLAY" }), b("sign_door", { COLOR: "blue" })]),
+    b("sign_each", {}, { DO: b("sign_words", { WORD: "PLAY" }) }),
+    b("sign_each_club", {}, { DO: b("sign_words", { WORD: "PLAY" }) }),
+    chain([
+      b("sign_each_club", {}, { DO: b("sign_words", { WORD: "PLAY" }) }),
+      b("sign_door", { COLOR: "blue" })
+    ]),
+    b("sign_each", {}, { DO: b("sign_if", { TEST: "club" }, { DO: b("sign_words", { WORD: "PLAY" }) }) }),
+    b("sign_each", {}, { DO: b("sign_if", { TEST: "shop" }, { DO: b("sign_words", { WORD: "OPEN" }) }) }),
+    b("sign_each", {}, { DO: b("sign_words", { WORD: "PLAY" }) }),
+    b("sign_each", {}, { DO: b("sign_if_else", { TEST: "cracked" }, {
+      DO: b("sign_words", { WORD: "FIX ME" }),
+      ELSE: b("sign_if", { TEST: "club" }, { DO: b("sign_words", { WORD: "PLAY" }) })
+    }) }),
+    b("sign_each", {}, { DO: b("sign_if_else", { TEST: "cracked" }, {
+      DO: b("sign_words", { WORD: "FIX ME" }),
+      ELSE: b("sign_if_else", { TEST: "club" }, {
+        DO: b("sign_words", { WORD: "PLAY" }),
+        ELSE: b("sign_if", { TEST: "shop" }, { DO: b("sign_words", { WORD: "OPEN" }) })
+      })
+    }) })
+  ];
+  var stampSolutions = [
+    b("stamp_no"),
+    b("stamp_yes"),
+    b("stamp_if", { TEST: "check_failed" }, { DO: b("stamp_no") }),
+    b("stamp_each", {}, { DO: b("stamp_if_else", { TEST: "not_asked" }, {
+      DO: b("stamp_no"),
+      ELSE: b("stamp_yes")
+    }) }),
+    b("stamp_each", {}, { DO: b("stamp_if_else", { TEST: "check_failed" }, {
+      DO: b("stamp_no"),
+      ELSE: b("stamp_if_else", { TEST: "not_asked" }, {
+        DO: b("stamp_no"),
+        ELSE: b("stamp_yes")
+      })
+    }) }),
+    b("stamp_each", {}, { DO: b("stamp_if_else", { TEST: "asked_and_passed" }, {
+      DO: b("stamp_yes"),
+      ELSE: b("stamp_no")
+    }) }),
+    b("stamp_each", {}, { DO: b("stamp_if_else", { TEST: "asked_and_passed" }, {
+      DO: b("stamp_yes"),
+      ELSE: b("stamp_no")
+    }) }),
+    b("stamp_each", {}, { DO: b("stamp_if_else", { TEST: "exact" }, {
+      DO: b("stamp_yes"),
+      ELSE: b("stamp_no")
+    }) }),
+    b("stamp_each", {}, { DO: b("stamp_if_else", { TEST: "check_failed" }, {
+      DO: b("stamp_no"),
+      ELSE: b("stamp_if_else", { TEST: "exact" }, {
+        DO: b("stamp_yes"),
+        ELSE: b("stamp_no")
+      })
+    }) }),
+    b("stamp_each", {}, { DO: b("stamp_if_else", { TEST: "asked_and_passed" }, {
+      DO: b("stamp_if_else", { TEST: "exact" }, {
+        DO: b("stamp_yes"),
+        ELSE: b("stamp_no")
+      }),
+      ELSE: b("stamp_no")
+    }) })
+  ];
+  var routeSolutions = [
+    chain([b("route_follow"), b("route_helpful")]),
+    b("route_follow"),
+    b("route_follow"),
+    chain([b("route_follow"), b("route_skip_bossy"), b("route_read")]),
+    chain([
+      b("route_follow"),
+      b("route_each_line", {}, { DO: b("route_if_helpful", {}, { DO: b("route_use_line") }) })
+    ]),
+    chain([
+      b("route_follow"),
+      b("route_each_letter", {}, { DO: b("route_if_match", {}, { DO: b("route_helpful") }) })
+    ]),
+    chain([
+      b("route_follow"),
+      b("route_skip_reason", { REASON: "key" }),
+      b("route_read")
+    ]),
+    chain([
+      b("route_follow"),
+      b("route_each_line", {}, { DO: b("route_if_else_reason", { REASON: "trash" }, {
+        DO: b("route_skip_line"),
+        ELSE: b("route_use_line")
+      }) })
+    ]),
+    chain([
+      b("route_follow"),
+      b("route_each_letter", {}, { DO: b("route_if_match", {}, {
+        DO: b("route_helpful"),
+        ELSE: b("route_skip_letter")
+      }) })
+    ]),
+    chain([
+      b("route_follow"),
+      b("route_each_letter", {}, { DO: b("route_if_tag", { TAG: "useful" }, { DO: b("route_helpful") }) })
+    ])
+  ];
+
   // art.mjs
   function esc(value) {
     return String(value).replace(/[&<>"']/g, (ch) => ({
@@ -225,6 +337,12 @@
             <button id="reset" type="button">Reset</button>
             <button id="start-over" type="button">Start over</button>
             <span id="capacity"></span>
+            <button id="teacher" type="button" aria-label="Teacher answer" title="Teacher answer">
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                <path d="M8 2.2 L14.2 6 L8 9.8 L1.8 6 Z" fill="none" stroke="currentColor" stroke-width="1.3"/>
+                <path d="M4.2 7.6 V11 Q8 13 11.8 11 V7.6" fill="none" stroke="currentColor" stroke-width="1.3"/>
+              </svg>
+            </button>
           </div>
         </div>
         <div id="blockly-column"><div id="blockly"></div></div>
@@ -241,6 +359,17 @@
           <button id="outcome-ok" type="button">OK</button>
           <a id="outcome-next" class="next-link" hidden href="${next}">${nextLabel}</a>
         </div>
+      </div>
+      <div id="teacher-shadow" hidden></div>
+      <div id="teacher-box" role="dialog" aria-modal="true" aria-labelledby="teacher-title" hidden>
+        <div id="teacher-title">Teacher answer</div>
+        <p id="teacher-text">Enter the teacher password to fill in this level.</p>
+        <p id="teacher-error" hidden>That password did not work.</p>
+        <form id="teacher-form">
+          <label for="teacher-password">Password</label>
+          <input id="teacher-password" type="password" autocomplete="off" spellcheck="false">
+          <button type="submit">Show</button>
+        </form>
       </div>
       <div id="lock-shadow" hidden></div>
       <div id="lock-box" role="dialog" aria-modal="true" aria-labelledby="lock-title" hidden>
@@ -487,9 +616,69 @@
       unlockThrough(config, lockTarget);
       location.href = `${config.file}?level=${lockTarget}`;
     });
+    const teacherShadow = document.getElementById("teacher-shadow");
+    const teacherBox = document.getElementById("teacher-box");
+    const teacherForm = document.getElementById("teacher-form");
+    const teacherError = document.getElementById("teacher-error");
+    const teacherReady = () => sessionStorage.getItem("pip:teacher") === "yes";
+    const hideTeacher = () => {
+      teacherBox.hidden = true;
+      teacherShadow.hidden = true;
+      teacherError.hidden = true;
+      document.getElementById("teacher-password").value = "";
+    };
+    const loadAnswer = () => {
+      const solution = config.solutions[levelNum - 1];
+      loading = true;
+      Blockly.Events.setGroup(true);
+      for (const block of workspace.getTopBlocks(false)) block.dispose(false);
+      const note2 = realize(workspace, { type: "pip_note", next: solution });
+      note2.moveBy(24, 24);
+      note2.setDeletable(false);
+      Blockly.Events.setGroup(false);
+      loading = false;
+      picture = config.begin(level);
+      workspace.highlightBlock(null);
+      hideOutcome();
+      draw();
+      showCapacity();
+      try {
+        localStorage.setItem(
+          storageKey(config, levelNum),
+          JSON.stringify(Blockly.serialization.workspaces.save(workspace))
+        );
+      } catch (error) {
+      }
+      chat("pip", "Teacher answer is on the note. Press Run when you want to watch it.");
+    };
+    document.getElementById("teacher").addEventListener("click", () => {
+      if (running) return;
+      if (teacherReady()) {
+        loadAnswer();
+        return;
+      }
+      teacherError.hidden = true;
+      document.getElementById("teacher-password").value = "";
+      teacherBox.hidden = false;
+      teacherShadow.hidden = false;
+      document.getElementById("teacher-password").focus();
+    });
+    teacherShadow.addEventListener("click", hideTeacher);
+    teacherForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (document.getElementById("teacher-password").value !== "admin") {
+        teacherError.hidden = false;
+        document.getElementById("teacher-password").focus();
+        return;
+      }
+      sessionStorage.setItem("pip:teacher", "yes");
+      hideTeacher();
+      loadAnswer();
+    });
     document.addEventListener("keydown", (event) => {
       if (event.key !== "Escape") return;
       if (!lockBox.hidden) hideLock();
+      if (!teacherBox.hidden) hideTeacher();
       hideOutcome();
     });
     const showCapacity = () => {
@@ -1191,6 +1380,7 @@
     about: "Pip delivers packages. Your route card is the job. On the way he finds notes taped to packages, stuck on doors, or left in mailboxes. Some notes help with the delivery. Some try to give Pip a different job.",
     realLife: "An AI helper reads web pages, files, and emails while it works. Sometimes the words in those places try to give it new orders. The task you actually gave it stays in charge.",
     levels: routeLevels,
+    solutions: routeSolutions,
     begin: beginRoute,
     check: checkRoute,
     render: renderRoute,

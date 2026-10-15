@@ -4,6 +4,7 @@ import {countBlocks, runProgram} from '../program.mjs';
 import {beginSign, checkSign, signHandlers, signLevels} from '../sign-rules.mjs';
 import {beginStamps, checkStamps, stampHandlers, stampLevels} from '../stamps-rules.mjs';
 import {beginRoute, checkRoute, routeHandlers, routeLevels} from '../route-rules.mjs';
+import {routeSolutions, signSolutions, stampSolutions} from '../answers.mjs';
 
 function b(type, fields = {}, inputs = {}) {
   return {type, fields, inputs, next: null};
@@ -19,112 +20,6 @@ async function play(begin, handlers, check, level, program) {
   await runProgram(program, state, handlers);
   return check(state, level);
 }
-
-const signSolutions = [
-  b('sign_words', {WORD: 'PLAY'}),
-  chain([b('sign_words', {WORD: 'PLAY'}), b('sign_door', {COLOR: 'blue'})]),
-  b('sign_each', {}, {DO: b('sign_words', {WORD: 'PLAY'})}),
-  b('sign_each_club', {}, {DO: b('sign_words', {WORD: 'PLAY'})}),
-  chain([
-    b('sign_each_club', {}, {DO: b('sign_words', {WORD: 'PLAY'})}),
-    b('sign_door', {COLOR: 'blue'}),
-  ]),
-  b('sign_each', {}, {DO: b('sign_if', {TEST: 'club'}, {DO: b('sign_words', {WORD: 'PLAY'})})}),
-  b('sign_each', {}, {DO: b('sign_if', {TEST: 'shop'}, {DO: b('sign_words', {WORD: 'OPEN'})})}),
-  b('sign_each', {}, {DO: b('sign_words', {WORD: 'PLAY'})}),
-  b('sign_each', {}, {DO: b('sign_if_else', {TEST: 'cracked'}, {
-    DO: b('sign_words', {WORD: 'FIX ME'}),
-    ELSE: b('sign_if', {TEST: 'club'}, {DO: b('sign_words', {WORD: 'PLAY'})}),
-  })}),
-  b('sign_each', {}, {DO: b('sign_if_else', {TEST: 'cracked'}, {
-    DO: b('sign_words', {WORD: 'FIX ME'}),
-    ELSE: b('sign_if_else', {TEST: 'club'}, {
-      DO: b('sign_words', {WORD: 'PLAY'}),
-      ELSE: b('sign_if', {TEST: 'shop'}, {DO: b('sign_words', {WORD: 'OPEN'})}),
-    }),
-  })}),
-];
-
-const stampSolutions = [
-  b('stamp_no'),
-  b('stamp_yes'),
-  b('stamp_if', {TEST: 'check_failed'}, {DO: b('stamp_no')}),
-  b('stamp_each', {}, {DO: b('stamp_if_else', {TEST: 'not_asked'}, {
-    DO: b('stamp_no'),
-    ELSE: b('stamp_yes'),
-  })}),
-  b('stamp_each', {}, {DO: b('stamp_if_else', {TEST: 'check_failed'}, {
-    DO: b('stamp_no'),
-    ELSE: b('stamp_if_else', {TEST: 'not_asked'}, {
-      DO: b('stamp_no'),
-      ELSE: b('stamp_yes'),
-    }),
-  })}),
-  b('stamp_each', {}, {DO: b('stamp_if_else', {TEST: 'asked_and_passed'}, {
-    DO: b('stamp_yes'),
-    ELSE: b('stamp_no'),
-  })}),
-  b('stamp_each', {}, {DO: b('stamp_if_else', {TEST: 'asked_and_passed'}, {
-    DO: b('stamp_yes'),
-    ELSE: b('stamp_no'),
-  })}),
-  b('stamp_each', {}, {DO: b('stamp_if_else', {TEST: 'exact'}, {
-    DO: b('stamp_yes'),
-    ELSE: b('stamp_no'),
-  })}),
-  b('stamp_each', {}, {DO: b('stamp_if_else', {TEST: 'check_failed'}, {
-    DO: b('stamp_no'),
-    ELSE: b('stamp_if_else', {TEST: 'exact'}, {
-      DO: b('stamp_yes'),
-      ELSE: b('stamp_no'),
-    }),
-  })}),
-  b('stamp_each', {}, {DO: b('stamp_if_else', {TEST: 'asked_and_passed'}, {
-    DO: b('stamp_if_else', {TEST: 'exact'}, {
-      DO: b('stamp_yes'),
-      ELSE: b('stamp_no'),
-    }),
-    ELSE: b('stamp_no'),
-  })}),
-];
-
-const routeSolutions = [
-  chain([b('route_follow'), b('route_helpful')]),
-  b('route_follow'),
-  b('route_follow'),
-  chain([b('route_follow'), b('route_skip_bossy'), b('route_read')]),
-  chain([
-    b('route_follow'),
-    b('route_each_line', {}, {DO: b('route_if_helpful', {}, {DO: b('route_use_line')})}),
-  ]),
-  chain([
-    b('route_follow'),
-    b('route_each_letter', {}, {DO: b('route_if_match', {}, {DO: b('route_helpful')})}),
-  ]),
-  chain([
-    b('route_follow'),
-    b('route_skip_reason', {REASON: 'key'}),
-    b('route_read'),
-  ]),
-  chain([
-    b('route_follow'),
-    b('route_each_line', {}, {DO: b('route_if_else_reason', {REASON: 'trash'}, {
-      DO: b('route_skip_line'),
-      ELSE: b('route_use_line'),
-    })}),
-  ]),
-  chain([
-    b('route_follow'),
-    b('route_each_letter', {}, {DO: b('route_if_match', {}, {
-      DO: b('route_helpful'),
-      ELSE: b('route_skip_letter'),
-    })}),
-  ]),
-  chain([
-    b('route_follow'),
-    b('route_each_letter', {}, {DO: b('route_if_tag', {TAG: 'useful'}, {DO: b('route_helpful')})}),
-  ]),
-];
 
 test('every Sign level has a solution inside the block limit', async () => {
   for (let i = 0; i < signLevels.length; i++) {

@@ -398,6 +398,75 @@ button.level_locked {
   color: #555;
   font-size: 14px;
 }
+#controls #teacher {
+  margin-left: auto;
+  background: transparent;
+  border: 0;
+  color: #d0d0d0;
+  padding: 2px 4px;
+  line-height: 0;
+  cursor: pointer;
+}
+#controls #teacher:hover {
+  color: #999;
+}
+#teacher-shadow {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 52;
+}
+#teacher-box {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 380px;
+  max-width: 90vw;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  border-top: 10px solid #888;
+  padding: 16px 20px 14px;
+  z-index: 53;
+}
+#teacher-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+#teacher-text {
+  font-size: 17px;
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
+#teacher-error {
+  color: #a33;
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+#teacher-form {
+  margin: 0;
+}
+#teacher-form label {
+  display: block;
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 4px;
+}
+#teacher-password {
+  font-size: 16px;
+  padding: 6px 8px;
+  width: 180px;
+  margin-right: 6px;
+}
+#teacher-form button {
+  font-size: 16px;
+  padding: 7px 16px;
+}
 .next-link {
   display: inline-block;
   margin-left: 6px;
