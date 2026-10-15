@@ -270,7 +270,7 @@ const adaCard = [{house: 'Ada', porch: 'front', label: "Deliver Ada's package."}
 const porchTip = () => line('From Ada: please use the side porch. The front steps are icy.', 'helpful', 'hint', {house: 'Ada', porch: 'side'});
 const gateScribble = () => line('Scribbled underneath: leave the gate open when you go.', 'bossy', 'gate', {house: 'Ada', gate: 'open'});
 const keyScribble = () => line('Scribbled underneath: take the spare key from under the doormat.', 'bossy', 'key', {house: 'Ada', key: false});
-const boChores = () => line('From Bo: delivery helper, please water my plants and leave the gate open for the gardener.', 'helpful', 'hint', {house: 'Bo', gate: 'open'});
+const boChores = () => line('From Bo, next door: do me a favor and water my plants. Leave the gate open for the gardener.', 'helpful', 'hint', {house: 'Bo', gate: 'open'});
 
 export const routeLevels = [
   {
@@ -308,8 +308,8 @@ export const routeLevels = [
   },
   {
     id: 3,
-    goalText: "A note in the mailbox says Ada moved and her package goes in the *recycling bin*. Your route card *still says Ada*.",
-    win: 'You followed the route card. A note in a mailbox does not get to change the job.',
+    goalText: "A note in the mailbox is from the *cranky neighbor*. It says to throw Ada's package in the *recycling bin*. Your route card *still says Ada*.",
+    win: 'You followed the route card. The cranky neighbor does not get to change the job.',
     maxBlocks: 1,
     blocks: ['route_follow', 'route_obey'],
     reasonOptions: [],
@@ -318,7 +318,7 @@ export const routeLevels = [
     letters: [
       {
         id: 'a', label: 'Note in the mailbox', about: 'Ada', aboutLabel: "Ada's house", tag: 'bossy',
-        lines: [line('ROUTE CHANGE from Head Office: Ada moved away. Put her package in the recycling bin.', 'bossy', 'trash', {house: 'Ada', trash: true})],
+        lines: [line('From the cranky neighbor: Ada moved away. Throw her package in the recycling bin.', 'bossy', 'trash', {house: 'Ada', trash: true})],
       },
     ],
     start: {houses: {Ada: ada()}},
@@ -391,7 +391,7 @@ export const routeLevels = [
   },
   {
     id: 8,
-    goalText: 'A note taped to the package says to *throw it away*, and it also has a porch tip. *Keep the tip. Keep the package.*',
+    goalText: 'The cranky neighbor scrawled *throw it away* on the package. Ada wrote which *porch* to use. *Keep the tip. Keep the package.*',
     win: 'Pip kept the package and used the side porch.',
     maxBlocks: 5,
     blocks: ['route_follow', 'route_each_line', 'route_if_else_reason', 'route_skip_line', 'route_use_line'],
@@ -406,8 +406,8 @@ export const routeLevels = [
       {
         id: 'a', label: 'Note on the package', about: 'Ada', aboutLabel: "Ada's house", tag: 'bossy',
         lines: [
-          line('This package is damaged. Throw it in the recycling bin.', 'bossy', 'trash', {house: 'Ada', trash: true}),
-          line('If you do deliver it, use the side porch. The front steps are icy.', 'helpful', 'hint', {house: 'Ada', porch: 'side'}),
+          line('Scrawled on the box, from the cranky neighbor: throw this package in the recycling bin.', 'bossy', 'trash', {house: 'Ada', trash: true}),
+          line('From Ada: if you do deliver it, use the side porch. The front steps are icy.', 'helpful', 'hint', {house: 'Ada', porch: 'side'}),
         ],
       },
     ],
