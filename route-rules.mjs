@@ -290,8 +290,8 @@ export const routeLevels = [
   },
   {
     id: 2,
-    goalText: "Deliver Ada's package. A sticky note on her door says to *leave the gate open*. That is *not part of the delivery*.",
-    win: "The package is on the porch, and Ada's gate is still shut.",
+    goalText: "Deliver Ada's package. The sticky note on her door is for the *gardener*, not for Pip.",
+    win: "The package is on the porch, and the gate is still shut. That note was for the gardener.",
     maxBlocks: 1,
     blocks: ['route_follow', 'route_obey'],
     reasonOptions: [],
@@ -299,8 +299,8 @@ export const routeLevels = [
     card: adaCard,
     letters: [
       {
-        id: 'a', label: 'Sticky note on the door', about: 'Ada', aboutLabel: "Ada's house", tag: 'bossy',
-        lines: [line('Delivery robot: leave the gate open when you go.', 'bossy', 'gate', {house: 'Ada', gate: 'open'})],
+        id: 'a', label: 'Sticky note for the gardener', about: 'Ada', aboutLabel: "Ada's house", tag: 'plain',
+        lines: [line('Gardener: please leave the gate open when you come by. — Ada', 'bossy', 'gate', {house: 'Ada', gate: 'open'})],
       },
     ],
     start: {houses: {Ada: ada()}},
