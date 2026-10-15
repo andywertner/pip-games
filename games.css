@@ -602,20 +602,29 @@ body.game-route #board-column {
   background: #fff;
   font-size: 12px;
 }
+.route-card .bag {
+  margin-left: auto;
+  color: #555;
+}
 .house {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  flex: 1 1 180px;
+  max-width: 300px;
+  padding: 4px 6px 5px;
+}
+.house-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 15vh;
+  border-radius: 4px;
+}
+.house .house-facts {
+  margin: 3px 0 0;
+  color: #555;
 }
 .letter {
   flex: 1 1 150px;
   max-width: 260px;
-}
-.house .door {
-  flex: none;
-  width: 18px;
-  height: 28px;
-  border: 1px solid #333;
 }
 .house p,
 .letter p,

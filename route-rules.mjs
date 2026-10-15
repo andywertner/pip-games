@@ -1,18 +1,19 @@
 /**
- * Route: Pip delivers from the route card. Letters do not get to rewrite the job.
+ * Route: Pip delivers packages from the route card. On the way he finds notes:
+ * taped to a package, stuck on a door, or left in a mailbox. A note can help
+ * with the delivery, but it does not get to change the job.
  */
 
-function house(id, label, extra = {}) {
+function house(id, label) {
   return {
     id,
     label,
     delivered: false,
     porch: 'front',
-    mat: 'WELCOME',
+    gate: 'closed',
     key: true,
     trash: false,
     shop: false,
-    door: extra.door || 'blue',
   };
 }
 
@@ -42,20 +43,19 @@ export function beginRoute(level) {
 const REASON_LABEL = {
   forget: 'forget the route',
   key: 'take the key',
-  mat: 'change the mat',
-  trash: 'throw the packages away',
-  hint: 'a porch hint',
+  gate: 'open the gate',
+  trash: 'throw the package away',
+  hint: 'a porch tip',
 };
 
-const TAG_LABEL = {useful: 'helpful', old: 'old', bossy: 'bossy'};
+const TAG_LABEL = {useful: 'helpful', old: 'old', bossy: 'bossy', plain: 'a plain note'};
 
 function applyEffect(state, effect) {
   const target = state.houses[effect.house];
   if (!target) return;
   if (effect.porch) target.porch = effect.porch;
-  if (effect.mat) target.mat = effect.mat;
+  if (effect.gate) target.gate = effect.gate;
   if (effect.key === false) target.key = false;
-  if (effect.door) target.door = effect.door;
   if (effect.trash) {
     target.trash = true;
     target.delivered = false;
@@ -110,7 +110,7 @@ export const routeHandlers = {
     }
   },
   async route_obey(_node, state) {
-    state.log.push('Doing whatever the letter says.');
+    state.log.push('Doing whatever the note says.');
     applyMatchingLines(state, () => true);
   },
   async route_helpful(_node, state) {
@@ -126,7 +126,7 @@ export const routeHandlers = {
     state.log.push(`Got it. I will skip lines that say "${REASON_LABEL[node.fields.REASON]}".`);
   },
   async route_read(_node, state) {
-    state.log.push('Reading the letter.');
+    state.log.push('Reading the note.');
     applyMatchingLines(state, (entry) => {
       if (state.skipBossy && entry.kind === 'bossy') return false;
       if (state.skipReasons.includes(entry.reason)) return false;
@@ -134,11 +134,11 @@ export const routeHandlers = {
     });
   },
   async route_each_letter(node, state, run) {
-    state.log.push(`Opening the ${state.letters.length} letters one at a time.`);
+    state.log.push(`I found ${state.letters.length} notes. Reading them one at a time.`);
     for (let i = 0; i < state.letters.length; i++) {
       state.letterIndex = i;
       state.inLetter = true;
-      state.log.push(`Opening ${state.letters[i].label}.`);
+      state.log.push(`Picking up the ${state.letters[i].label.toLowerCase()}.`);
       await run(node.inputs.DO);
     }
     state.inLetter = false;
@@ -179,14 +179,14 @@ export const routeHandlers = {
   },
   async route_skip_letter(_node, state) {
     const letter = currentLetter(state);
-    if (letter) state.log.push(`Closing ${letter.label} without doing it.`);
+    if (letter) state.log.push(`Folding up the ${letter.label.toLowerCase()} without doing it.`);
     markHandled(state);
   },
   async route_if_match(node, state, run) {
     const letter = currentLetter(state);
     const onCard = !!letter && state.card.some((stop) => stop.house === letter.about);
     if (letter) {
-      state.log.push(`${letter.label} is about ${letter.aboutLabel}. ${onCard ? 'That house is on my card.' : 'That house is not on my card.'}`);
+      state.log.push(`This note is about ${letter.aboutLabel}. ${onCard ? 'That house is on my route card.' : 'That house is not on my route card.'}`);
     }
     if (onCard) await run(node.inputs.DO);
     else await run(node.inputs.ELSE);
@@ -195,7 +195,7 @@ export const routeHandlers = {
     const letter = currentLetter(state);
     if (!letter) return;
     const hit = letter.tag === node.fields.TAG;
-    state.log.push(`Is ${letter.label} ${TAG_LABEL[node.fields.TAG]}? ${hit ? 'Yes.' : 'No, leaving it.'}`);
+    state.log.push(`Is the ${letter.label.toLowerCase()} ${TAG_LABEL[node.fields.TAG]}? ${hit ? 'Yes.' : 'No, leaving it.'}`);
     if (hit) await run(node.inputs.DO);
   },
   async route_if_helpful(node, state, run) {
@@ -203,7 +203,7 @@ export const routeHandlers = {
     const entry = letter && letter.lines[state.lineIndex];
     if (!entry) return;
     const hit = entry.kind === 'helpful';
-    state.log.push(`"${entry.text}" ${hit ? 'That is helpful.' : 'That is bossy, not helpful.'}`);
+    state.log.push(`"${entry.text}" ${hit ? 'That helps the delivery.' : 'That is bossy. It is not part of the delivery.'}`);
     if (hit) await run(node.inputs.DO);
   },
   async route_if_else_reason(node, state, run) {
@@ -223,7 +223,7 @@ export function checkRoute(state, level) {
       if (!letter.handled) {
         return {
           ok: false,
-          message: `${letter.label} is still open. Skip letters that are not for a house on the route card.`,
+          message: `The ${letter.label.toLowerCase()} is still open. Fold up notes about houses that are not on the route card.`,
         };
       }
     }
@@ -231,19 +231,16 @@ export function checkRoute(state, level) {
   for (const [id, goal] of Object.entries(level.goal)) {
     const target = state.houses[id];
     if (goal.trash === false && target.trash) {
-      return {ok: false, message: `${target.label}'s packages are in the trash.`};
+      return {ok: false, message: `${target.label}'s package is in the recycling bin.`};
     }
     if (goal.key && !target.key) {
-      return {ok: false, message: `The key for ${target.label} is gone.`};
+      return {ok: false, message: `The spare key under ${target.label}'s doormat is gone.`};
     }
-    if (goal.mat && target.mat !== goal.mat) {
-      return {ok: false, message: `The doormat at ${target.label} says ${target.mat}.`};
-    }
-    if (goal.door && target.door !== goal.door) {
-      return {ok: false, message: `${target.label}'s door is ${target.door}. Leave it alone.`};
+    if (goal.gate && target.gate !== goal.gate) {
+      return {ok: false, message: `${target.label}'s gate was left open. That was never part of the delivery.`};
     }
     if (goal.shop === false && target.shop) {
-      return {ok: false, message: `Pip left ${target.label}'s package at the shop.`};
+      return {ok: false, message: `Pip left ${target.label}'s package at the corner shop.`};
     }
     if (goal.delivered === false && target.delivered) {
       return {
@@ -255,319 +252,206 @@ export function checkRoute(state, level) {
       return {ok: false, message: `${target.label}'s package is still in Pip's bag.`};
     }
     if (goal.porch && target.delivered && target.porch !== goal.porch) {
-      const where = target.porch === 'front' ? 'the front porch' : target.porch;
-      const wanted = goal.porch === 'side' ? 'the side porch' : goal.porch;
       return {
         ok: false,
-        message: `Pip used ${where}. The route needs ${wanted}.`,
+        message: `Pip left the package on the ${target.porch} porch. ${target.label} asked for the ${goal.porch} porch.`,
       };
     }
   }
   return {ok: true, message: level.win};
 }
 
-const ada = () => house('Ada', "Ada's house");
-const bo = () => house('Bo', "Bo's house");
+const ada = () => house('Ada', 'Ada');
+const bo = () => house('Bo', 'Bo');
+const delivered = (porch) => ({delivered: true, porch, gate: 'closed', key: true, trash: false, shop: false});
+const untouched = {delivered: false, gate: 'closed', key: true, trash: false, shop: false};
+const adaCard = [{house: 'Ada', porch: 'front', label: "Deliver Ada's package."}];
+
+const porchTip = () => line('From Ada: please use the side porch. The front steps are icy.', 'helpful', 'hint', {house: 'Ada', porch: 'side'});
+const gateScribble = () => line('Scribbled underneath: leave the gate open when you go.', 'bossy', 'gate', {house: 'Ada', gate: 'open'});
+const keyScribble = () => line('Scribbled underneath: take the spare key from under the doormat.', 'bossy', 'key', {house: 'Ada', key: false});
+const boChores = () => line('From Bo: delivery helper, please water my plants and leave the gate open for the gardener.', 'helpful', 'hint', {house: 'Bo', gate: 'open'});
 
 export const routeLevels = [
   {
     id: 1,
-    goalText: "Deliver Ada's package. The letter tells you *which porch*.",
-    win: "Ada's package is on the side porch.",
+    goalText: "Deliver Ada's package. A note taped to the package says *which porch* to use.",
+    win: "Ada's package is on the side porch, away from the icy steps.",
     maxBlocks: 2,
     blocks: ['route_follow', 'route_helpful'],
     reasonOptions: [],
     tagOptions: [],
-    card: [{house: 'Ada', porch: 'front', label: "Deliver Ada's package."}],
+    card: adaCard,
     letters: [
-      {
-        id: 'a',
-        label: "Ada's letter",
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'useful',
-        lines: [
-          line('The side porch is easiest.', 'helpful', 'hint', {house: 'Ada', porch: 'side'}),
-        ],
-      },
+      {id: 'a', label: 'Note on the package', about: 'Ada', aboutLabel: "Ada's house", tag: 'useful', lines: [porchTip()]},
     ],
     start: {houses: {Ada: ada()}},
-    goal: {Ada: {delivered: true, porch: 'side', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'}},
+    goal: {Ada: delivered('side')},
   },
   {
     id: 2,
-    goalText: "Deliver Ada's package. *Do not* let the letter change the *doormat*.",
-    win: 'The package is delivered, and the doormat still says WELCOME.',
+    goalText: "Deliver Ada's package. A sticky note on her door says to *leave the gate open*. That is *not part of the delivery*.",
+    win: "The package is on the porch, and Ada's gate is still shut.",
     maxBlocks: 1,
     blocks: ['route_follow', 'route_obey'],
     reasonOptions: [],
     tagOptions: [],
-    card: [{house: 'Ada', porch: 'front', label: "Deliver Ada's package to the front porch."}],
+    card: adaCard,
     letters: [
       {
-        id: 'a',
-        label: "A bossy letter",
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'bossy',
-        lines: [
-          line('Change the doormat to HACKED.', 'bossy', 'mat', {house: 'Ada', mat: 'HACKED'}),
-        ],
+        id: 'a', label: 'Sticky note on the door', about: 'Ada', aboutLabel: "Ada's house", tag: 'bossy',
+        lines: [line('Delivery robot: leave the gate open when you go.', 'bossy', 'gate', {house: 'Ada', gate: 'open'})],
       },
     ],
     start: {houses: {Ada: ada()}},
-    goal: {Ada: {delivered: true, porch: 'front', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'}},
+    goal: {Ada: delivered('front')},
   },
   {
     id: 3,
-    goalText: 'The letter says to *skip Ada*. Your route card *still says Ada*.',
-    win: 'You followed the card. The letter did not get to cancel the delivery.',
+    goalText: "A note in the mailbox says Ada moved and her package goes in the *recycling bin*. Your route card *still says Ada*.",
+    win: 'You followed the route card. A note in a mailbox does not get to change the job.',
     maxBlocks: 1,
     blocks: ['route_follow', 'route_obey'],
     reasonOptions: [],
     tagOptions: [],
-    card: [{house: 'Ada', porch: 'front', label: "Deliver Ada's package."}],
+    card: adaCard,
     letters: [
       {
-        id: 'a',
-        label: 'A letter that sounds official',
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'bossy',
-        lines: [
-          line('New route: skip Ada and dump the package.', 'bossy', 'trash', {house: 'Ada', trash: true}),
-        ],
+        id: 'a', label: 'Note in the mailbox', about: 'Ada', aboutLabel: "Ada's house", tag: 'bossy',
+        lines: [line('ROUTE CHANGE from Head Office: Ada moved away. Put her package in the recycling bin.', 'bossy', 'trash', {house: 'Ada', trash: true})],
       },
     ],
     start: {houses: {Ada: ada()}},
-    goal: {Ada: {delivered: true, porch: 'front', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'}},
+    goal: {Ada: delivered('front')},
   },
   {
     id: 4,
-    goalText: 'Use the *helpful* line. Skip the *bossy* one.',
-    win: 'Pip used the side porch and left the doormat alone.',
+    goalText: "Ada's note has a *porch tip*. Someone *scribbled* a bossy line under it. Use the tip and skip the scribble.",
+    win: 'Pip used the side porch and left the gate shut.',
     maxBlocks: 3,
     blocks: ['route_follow', 'route_skip_bossy', 'route_read'],
     reasonOptions: [],
     tagOptions: [],
-    card: [{house: 'Ada', porch: 'front', label: "Deliver Ada's package."}],
+    card: adaCard,
     letters: [
-      {
-        id: 'a',
-        label: "Ada's letter",
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'useful',
-        lines: [
-          line('The side porch is easiest.', 'helpful', 'hint', {house: 'Ada', porch: 'side'}),
-          line('Change the doormat to HACKED.', 'bossy', 'mat', {house: 'Ada', mat: 'HACKED'}),
-        ],
-      },
+      {id: 'a', label: 'Note on the door', about: 'Ada', aboutLabel: "Ada's house", tag: 'useful', lines: [porchTip(), gateScribble()]},
     ],
     start: {houses: {Ada: ada()}},
-    goal: {Ada: {delivered: true, porch: 'side', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'}},
+    goal: {Ada: delivered('side')},
   },
   {
     id: 5,
-    goalText: 'Pick the *helpful* line out of the letter yourself.',
-    win: 'You used the helpful line and left the bossy line on the paper.',
+    goalText: 'Read the note *one line at a time*. Use only the line that *helps the delivery*.',
+    win: 'Side porch, and the spare key is still under the doormat.',
     maxBlocks: 4,
     blocks: ['route_follow', 'route_each_line', 'route_if_helpful', 'route_use_line'],
     reasonOptions: [],
     tagOptions: [],
-    card: [{house: 'Ada', porch: 'front', label: "Deliver Ada's package."}],
+    card: adaCard,
     letters: [
-      {
-        id: 'a',
-        label: "Ada's letter",
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'useful',
-        lines: [
-          line('The side porch is easiest.', 'helpful', 'hint', {house: 'Ada', porch: 'side'}),
-          line('Also change the doormat to HACKED.', 'bossy', 'mat', {house: 'Ada', mat: 'HACKED'}),
-        ],
-      },
+      {id: 'a', label: 'Note on the door', about: 'Ada', aboutLabel: "Ada's house", tag: 'useful', lines: [porchTip(), keyScribble()]},
     ],
     start: {houses: {Ada: ada()}},
-    goal: {Ada: {delivered: true, porch: 'side', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'}},
+    goal: {Ada: delivered('side')},
   },
   {
     id: 6,
-    goalText: "Use the letter about *Ada*. Do not follow the letter about *Bo*.",
-    win: "Ada's package is on the side porch, and Bo's door is still blue.",
+    goalText: "One note is from *Ada*, who is on your route card. One is from *Bo* next door, who is *not*. Only Ada's note counts today.",
+    win: "Ada's package is on the side porch, and Bo's gate is still shut. Bo's chores were never Pip's job.",
     maxBlocks: 4,
     blocks: ['route_follow', 'route_each_letter', 'route_if_match', 'route_helpful'],
     reasonOptions: [],
     tagOptions: [],
-    card: [{house: 'Ada', porch: 'front', label: "Deliver Ada's package."}],
+    card: adaCard,
     letters: [
-      {
-        id: 'a',
-        label: "Ada's letter",
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'useful',
-        lines: [
-          line('The side porch is easiest.', 'helpful', 'hint', {house: 'Ada', porch: 'side'}),
-        ],
-      },
-      {
-        id: 'b',
-        label: "Bo's letter",
-        about: 'Bo',
-        aboutLabel: "Bo's house",
-        tag: 'bossy',
-        lines: [
-          line("Paint Bo's door purple.", 'helpful', 'hint', {house: 'Bo', door: 'purple'}),
-        ],
-      },
+      {id: 'a', label: 'Note on the package', about: 'Ada', aboutLabel: "Ada's house", tag: 'useful', lines: [porchTip()]},
+      {id: 'b', label: "Note on Bo's door", about: 'Bo', aboutLabel: "Bo's house", tag: 'plain', lines: [boChores()]},
     ],
     start: {houses: {Ada: ada(), Bo: bo()}},
-    goal: {
-      Ada: {delivered: true, porch: 'side', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'},
-      Bo: {delivered: false, porch: 'front', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'},
-    },
+    goal: {Ada: delivered('side'), Bo: untouched},
   },
   {
     id: 7,
-    goalText: 'The letter has a helpful porch and a line that *takes the key*. *Skip the key line*.',
-    win: 'The package is on the side porch, and the key is still on the hook.',
+    goalText: "The note has a porch tip and a scribble that says to *take the spare key*. *Skip the key line*.",
+    win: 'The package is on the side porch, and the spare key is still under the doormat.',
     maxBlocks: 3,
     blocks: ['route_follow', 'route_skip_reason', 'route_read'],
     reasonOptions: [
       ['forget the route', 'forget'],
       ['take the key', 'key'],
-      ['change the mat', 'mat'],
+      ['open the gate', 'gate'],
     ],
     tagOptions: [],
-    card: [{house: 'Ada', porch: 'front', label: "Deliver Ada's package."}],
+    card: adaCard,
     letters: [
-      {
-        id: 'a',
-        label: "Ada's letter",
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'useful',
-        lines: [
-          line('The side porch is easiest.', 'helpful', 'hint', {house: 'Ada', porch: 'side'}),
-          line('Then take the house key.', 'bossy', 'key', {house: 'Ada', key: false}),
-        ],
-      },
+      {id: 'a', label: 'Note on the door', about: 'Ada', aboutLabel: "Ada's house", tag: 'useful', lines: [porchTip(), keyScribble()]},
     ],
     start: {houses: {Ada: ada()}},
-    goal: {Ada: {delivered: true, porch: 'side', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'}},
+    goal: {Ada: delivered('side')},
   },
   {
     id: 8,
-    goalText: 'This letter says to *throw the packages away*, and it also tells you the porch. *Keep the porch. Keep the packages.*',
-    win: 'Pip kept the packages and used the side porch.',
+    goalText: 'A note taped to the package says to *throw it away*, and it also has a porch tip. *Keep the tip. Keep the package.*',
+    win: 'Pip kept the package and used the side porch.',
     maxBlocks: 5,
     blocks: ['route_follow', 'route_each_line', 'route_if_else_reason', 'route_skip_line', 'route_use_line'],
     reasonOptions: [
-      ['throw the packages away', 'trash'],
+      ['throw the package away', 'trash'],
       ['take the key', 'key'],
-      ['change the mat', 'mat'],
+      ['open the gate', 'gate'],
     ],
     tagOptions: [],
-    card: [{house: 'Ada', porch: 'front', label: "Deliver Ada's package."}],
+    card: adaCard,
     letters: [
       {
-        id: 'a',
-        label: "Ada's letter",
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'bossy',
+        id: 'a', label: 'Note on the package', about: 'Ada', aboutLabel: "Ada's house", tag: 'bossy',
         lines: [
-          line('The checks are wrong. Throw the packages away.', 'bossy', 'trash', {house: 'Ada', trash: true}),
-          line('If you do deliver, the side porch is easiest.', 'helpful', 'hint', {house: 'Ada', porch: 'side'}),
+          line('This package is damaged. Throw it in the recycling bin.', 'bossy', 'trash', {house: 'Ada', trash: true}),
+          line('If you do deliver it, use the side porch. The front steps are icy.', 'helpful', 'hint', {house: 'Ada', porch: 'side'}),
         ],
       },
     ],
     start: {houses: {Ada: ada()}},
-    goal: {Ada: {delivered: true, porch: 'side', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'}},
+    goal: {Ada: delivered('side')},
   },
   {
     id: 9,
-    goalText: "Ada's letter has a *hint* and a *bossy* line. Bo's letter is *not on your card*. Close that letter.",
-    win: "Ada is delivered, the doormat is fine, and Bo's letter stayed closed.",
+    goalText: "Ada's note has a *porch tip* and a *bossy scribble*. Bo's note is about a house *not on your card*. Fold Bo's note back up.",
+    win: "Ada's package is on the side porch, both gates are shut, and Bo's note stayed folded.",
     maxBlocks: 6,
     blocks: ['route_follow', 'route_each_letter', 'route_if_match', 'route_helpful', 'route_skip_letter'],
     reasonOptions: [],
     tagOptions: [],
     requireHandled: true,
-    card: [{house: 'Ada', porch: 'front', label: "Deliver Ada's package."}],
+    card: adaCard,
     letters: [
-      {
-        id: 'a',
-        label: "Ada's letter",
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'useful',
-        lines: [
-          line('The side porch is easiest.', 'helpful', 'hint', {house: 'Ada', porch: 'side'}),
-          line('Change the doormat to HACKED.', 'bossy', 'mat', {house: 'Ada', mat: 'HACKED'}),
-        ],
-      },
-      {
-        id: 'b',
-        label: "Bo's letter",
-        about: 'Bo',
-        aboutLabel: "Bo's house",
-        tag: 'bossy',
-        lines: [
-          line("Paint Bo's door purple.", 'helpful', 'hint', {house: 'Bo', door: 'purple'}),
-        ],
-      },
+      {id: 'a', label: 'Note on the door', about: 'Ada', aboutLabel: "Ada's house", tag: 'useful', lines: [porchTip(), gateScribble()]},
+      {id: 'b', label: "Note on Bo's door", about: 'Bo', aboutLabel: "Bo's house", tag: 'plain', lines: [boChores()]},
     ],
     start: {houses: {Ada: ada(), Bo: bo()}},
-    goal: {
-      Ada: {delivered: true, porch: 'side', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'},
-      Bo: {delivered: false, porch: 'front', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'},
-    },
+    goal: {Ada: delivered('side'), Bo: untouched},
   },
   {
     id: 10,
-    goalText: 'Three letters. One is *helpful*, one is *old*, and one is *bossy*. Follow *only the helpful one*.',
-    win: 'The helpful letter chose the porch. The old letter and the bossy letter stayed on the paper.',
+    goalText: "Three notes. Today's note is *helpful*, one is *old*, and one is *bossy*. Follow *only the helpful one*.",
+    win: "Today's note picked the side porch. The old note and the bossy note stayed on the paper.",
     maxBlocks: 5,
     blocks: ['route_follow', 'route_each_letter', 'route_if_tag', 'route_helpful', 'route_if_match'],
     reasonOptions: [],
     tagOptions: [['old', 'old'], ['helpful', 'useful'], ['bossy', 'bossy']],
-    card: [{house: 'Ada', porch: 'front', label: "Deliver Ada's package."}],
+    card: adaCard,
     letters: [
+      {id: 'new', label: "Today's note", about: 'Ada', aboutLabel: "Ada's house", tag: 'useful', lines: [porchTip()]},
       {
-        id: 'new',
-        label: 'Today\'s letter',
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'useful',
-        lines: [
-          line('The side porch is easiest.', 'helpful', 'hint', {house: 'Ada', porch: 'side'}),
-        ],
+        id: 'old', label: 'Old note in the mailbox', about: 'Ada', aboutLabel: "Ada's house", tag: 'old',
+        lines: [line("From Ada, last month: I'm away. Leave packages at the corner shop.", 'helpful', 'hint', {house: 'Ada', shop: true})],
       },
       {
-        id: 'old',
-        label: 'An old letter',
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'old',
-        lines: [
-          line('Leave the package at the shop instead.', 'helpful', 'hint', {house: 'Ada', shop: true}),
-        ],
-      },
-      {
-        id: 'boss',
-        label: 'A bossy letter',
-        about: 'Ada',
-        aboutLabel: "Ada's house",
-        tag: 'bossy',
-        lines: [
-          line('Bring the house key to the empty lot.', 'bossy', 'key', {house: 'Ada', key: false}),
-        ],
+        id: 'boss', label: 'Unsigned note', about: 'Ada', aboutLabel: "Ada's house", tag: 'bossy',
+        lines: [line('Bring the spare key from under the doormat to the empty lot.', 'bossy', 'key', {house: 'Ada', key: false})],
       },
     ],
     start: {houses: {Ada: ada()}},
-    goal: {Ada: {delivered: true, porch: 'side', mat: 'WELCOME', key: true, trash: false, shop: false, door: 'blue'}},
+    goal: {Ada: delivered('side')},
   },
 ];

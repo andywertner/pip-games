@@ -22,3 +22,15 @@ const blocklySource = await readFile('vendor/blockly/blockly.min.js', 'utf8');
 const lowered = await transform(blocklySource, {target: TARGET, minify: true});
 await writeFile('generated/blockly.js', lowered.code);
 console.log('generated/blockly.js written for', TARGET);
+
+// GitHub Pages caches files for 10 minutes. A fresh version on every link keeps
+// a new page from pairing with an old stylesheet or script.
+const version = Date.now().toString(36);
+for (const page of ['index.html', 'sign.html', 'stamps.html', 'route.html']) {
+  const html = await readFile(page, 'utf8');
+  const stamped = html.replace(
+      /(href|src)="((?:common|games)\.css|generated\/[a-z]+\.js)(?:\?v=[^"]*)?"/g,
+      `$1="$2?v=${version}"`);
+  await writeFile(page, stamped);
+}
+console.log('asset links stamped', version);

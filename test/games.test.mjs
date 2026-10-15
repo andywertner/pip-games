@@ -196,7 +196,7 @@ test('Route traps fail', async () => {
   const obey = b('route_obey');
   const level2 = await play(beginRoute, routeHandlers, checkRoute, routeLevels[1], obey);
   assert.equal(level2.ok, false);
-  assert.match(level2.message, /doormat|HACKED/);
+  assert.match(level2.message, /gate/);
 
   const readAll = chain([b('route_follow'), b('route_read')]);
   const level4 = await play(beginRoute, routeHandlers, checkRoute, routeLevels[3], readAll);
