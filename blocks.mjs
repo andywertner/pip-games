@@ -50,8 +50,40 @@ function branch(type, message, args, hasElse, tooltip) {
   return block;
 }
 
+function card(type, message, tooltip) {
+  return {
+    type,
+    message0: message,
+    message1: 'using %1',
+    args1: [{type: 'input_statement', name: 'DO'}],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 45,
+    tooltip,
+  };
+}
+
+function tool(type, message, tooltip) {
+  return {
+    type,
+    message0: message,
+    previousStatement: null,
+    nextStatement: null,
+    colour: 160,
+    tooltip,
+  };
+}
+
 function catalog(level) {
   const words = level.wordOptions || [['PLAY', 'PLAY']];
+  const tools = level.toolOptions || [['broom', 'broom'], ['watering can', 'can'], ['paintbrush', 'brush']];
+  const targets = level.targetOptions || [['the plants', 'plants']];
+  const subjects = level.subjectOptions || [['cat', 'cat']];
+  const colors = level.colorOptions || [['orange', 'orange']];
+  const sizes = level.sizeOptions || [['big', 'big'], ['small', 'small']];
+  const counts = level.countOptions || [['2', '2'], ['3', '3']];
+  const places = level.placeOptions || [['on the rug', 'rug']];
+  const nos = level.noOptions || [['hat', 'hat']];
   const doors = level.doorOptions || [['blue', 'blue']];
   const tests = level.testOptions || [['a club sign', 'club']];
   const elseTests = level.elseTests || tests;
@@ -66,6 +98,25 @@ function catalog(level) {
       colour: 20,
       tooltip: 'Connect your instructions under this block.',
     },
+    hello_wave: action('hello_wave', 'wave hello', [], 'Pip waves.'),
+    hello_lights: action('hello_lights', 'turn on the lights', [], 'Pip turns the lights on.'),
+    hello_grab: action('hello_grab', 'pick up the %1', [dropdown('TOOL', tools)], 'Pip picks up a tool.'),
+    hello_sweep: action('hello_sweep', 'sweep the floor', [], 'Pip sweeps, if he is holding the broom.'),
+    hello_water: action('hello_water', 'water %1', [dropdown('TARGET', targets)], 'Pip pours water on whatever you pick.'),
+    job_paint: card('job_paint', '🪧 job: paint the sign', 'Put the right tool in the slot.'),
+    job_sweep: card('job_sweep', '🧹 job: sweep the floor', 'Put the right tool in the slot.'),
+    job_water: card('job_water', '🪴 job: water the plants', 'Put the right tool in the slot.'),
+    tool_broom: tool('tool_broom', '🧹 broom', 'A broom. Good for sweeping.'),
+    tool_brush: tool('tool_brush', '🖌️ paintbrush', 'A paintbrush. Good for painting.'),
+    tool_can: tool('tool_can', '🚿 watering can', 'A watering can. Good for plants.'),
+    draw_subject: action('draw_subject', 'draw a %1', [dropdown('SUBJECT', subjects)], 'Pip draws this thing. Anything you leave out, Pip guesses.'),
+    draw_color: action('draw_color', 'make it %1', [dropdown('COLOR', colors)], 'Colours the last thing Pip drew.'),
+    draw_size: action('draw_size', 'make it %1', [dropdown('SIZE', sizes)], 'Changes the size of the last thing Pip drew.'),
+    draw_count: action('draw_count', 'draw %1 of them', [dropdown('COUNT', counts)], 'How many of the last thing to draw.'),
+    draw_place: action('draw_place', 'put it %1', [dropdown('PLACE', places)], 'Where the last thing goes.'),
+    draw_no: action('draw_no', 'no %1', [dropdown('NO', nos)], 'Tells Pip what you do not want.'),
+    draw_bigger: action('draw_bigger', 'make only the %1 bigger', [dropdown('SUBJECT', subjects)], 'Changes the size and nothing else.'),
+    draw_redo: action('draw_redo', 'draw it again, bigger', [], 'Starts the last thing over. Pip guesses the rest again.'),
     sign_words: action('sign_words', 'change the words to %1', [dropdown('WORD', words)], 'Changes the words and leaves stickers alone.'),
     sign_repaint: action('sign_repaint', 'change the sign to %1', [dropdown('WORD', words)], 'Paints over the whole sign, including stickers.'),
     sign_door: action('sign_door', 'paint the door %1', [dropdown('COLOR', doors)], 'Paints the clubhouse door.'),

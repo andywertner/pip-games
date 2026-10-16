@@ -10,6 +10,34 @@ function chain(nodes) {
   return nodes[0];
 }
 
+export const helloSolutions = [
+  b('hello_wave'),
+  chain([b('hello_grab', {TOOL: 'broom'}), b('hello_sweep')]),
+  b('hello_water', {TARGET: 'plants'}),
+  b('job_paint', {}, {DO: b('tool_brush')}),
+  chain([b('job_sweep', {}, {DO: b('tool_broom')}), b('job_water', {}, {DO: b('tool_can')})]),
+  chain([b('job_paint', {}, {DO: b('tool_brush')}), b('job_water', {}, {DO: b('tool_can')})]),
+];
+
+export const drawSolutions = [
+  b('draw_subject', {SUBJECT: 'cat'}),
+  chain([b('draw_subject', {SUBJECT: 'cat'}), b('draw_color', {COLOR: 'orange'})]),
+  chain([b('draw_subject', {SUBJECT: 'cat'}), b('draw_color', {COLOR: 'orange'}), b('draw_size', {SIZE: 'big'})]),
+  chain([b('draw_subject', {SUBJECT: 'fish'}), b('draw_color', {COLOR: 'blue'}), b('draw_count', {COUNT: '3'})]),
+  chain([b('draw_subject', {SUBJECT: 'cat'}), b('draw_place', {PLACE: 'rug'})]),
+  chain([
+    b('draw_subject', {SUBJECT: 'cat'}), b('draw_color', {COLOR: 'orange'}), b('draw_place', {PLACE: 'rug'}),
+    b('draw_subject', {SUBJECT: 'sun'}), b('draw_place', {PLACE: 'sky'}),
+  ]),
+  chain([b('draw_subject', {SUBJECT: 'dog'}), b('draw_color', {COLOR: 'green'}), b('draw_no', {NO: 'hat'})]),
+  b('draw_bigger', {SUBJECT: 'cat'}),
+  b('draw_bigger', {SUBJECT: 'dog'}),
+  chain([
+    b('draw_subject', {SUBJECT: 'fish'}), b('draw_color', {COLOR: 'purple'}), b('draw_size', {SIZE: 'big'}),
+    b('draw_place', {PLACE: 'pond'}), b('draw_no', {NO: 'hat'}),
+  ]),
+];
+
 export const signSolutions = [
   b('sign_words', {WORD: 'PLAY'}),
   chain([b('sign_words', {WORD: 'PLAY'}), b('sign_door', {COLOR: 'blue'})]),

@@ -7,6 +7,38 @@
     for (let i = 0; i < nodes.length - 1; i++) nodes[i].next = nodes[i + 1];
     return nodes[0];
   }
+  var helloSolutions = [
+    b("hello_wave"),
+    chain([b("hello_grab", { TOOL: "broom" }), b("hello_sweep")]),
+    b("hello_water", { TARGET: "plants" }),
+    b("job_paint", {}, { DO: b("tool_brush") }),
+    chain([b("job_sweep", {}, { DO: b("tool_broom") }), b("job_water", {}, { DO: b("tool_can") })]),
+    chain([b("job_paint", {}, { DO: b("tool_brush") }), b("job_water", {}, { DO: b("tool_can") })])
+  ];
+  var drawSolutions = [
+    b("draw_subject", { SUBJECT: "cat" }),
+    chain([b("draw_subject", { SUBJECT: "cat" }), b("draw_color", { COLOR: "orange" })]),
+    chain([b("draw_subject", { SUBJECT: "cat" }), b("draw_color", { COLOR: "orange" }), b("draw_size", { SIZE: "big" })]),
+    chain([b("draw_subject", { SUBJECT: "fish" }), b("draw_color", { COLOR: "blue" }), b("draw_count", { COUNT: "3" })]),
+    chain([b("draw_subject", { SUBJECT: "cat" }), b("draw_place", { PLACE: "rug" })]),
+    chain([
+      b("draw_subject", { SUBJECT: "cat" }),
+      b("draw_color", { COLOR: "orange" }),
+      b("draw_place", { PLACE: "rug" }),
+      b("draw_subject", { SUBJECT: "sun" }),
+      b("draw_place", { PLACE: "sky" })
+    ]),
+    chain([b("draw_subject", { SUBJECT: "dog" }), b("draw_color", { COLOR: "green" }), b("draw_no", { NO: "hat" })]),
+    b("draw_bigger", { SUBJECT: "cat" }),
+    b("draw_bigger", { SUBJECT: "dog" }),
+    chain([
+      b("draw_subject", { SUBJECT: "fish" }),
+      b("draw_color", { COLOR: "purple" }),
+      b("draw_size", { SIZE: "big" }),
+      b("draw_place", { PLACE: "pond" }),
+      b("draw_no", { NO: "hat" })
+    ])
+  ];
   var signSolutions = [
     b("sign_words", { WORD: "PLAY" }),
     chain([b("sign_words", { WORD: "PLAY" }), b("sign_door", { COLOR: "blue" })]),
@@ -184,8 +216,38 @@
     }
     return block;
   }
+  function card(type, message, tooltip) {
+    return {
+      type,
+      message0: message,
+      message1: "using %1",
+      args1: [{ type: "input_statement", name: "DO" }],
+      previousStatement: null,
+      nextStatement: null,
+      colour: 45,
+      tooltip
+    };
+  }
+  function tool(type, message, tooltip) {
+    return {
+      type,
+      message0: message,
+      previousStatement: null,
+      nextStatement: null,
+      colour: 160,
+      tooltip
+    };
+  }
   function catalog(level) {
     const words = level.wordOptions || [["PLAY", "PLAY"]];
+    const tools = level.toolOptions || [["broom", "broom"], ["watering can", "can"], ["paintbrush", "brush"]];
+    const targets = level.targetOptions || [["the plants", "plants"]];
+    const subjects = level.subjectOptions || [["cat", "cat"]];
+    const colors = level.colorOptions || [["orange", "orange"]];
+    const sizes = level.sizeOptions || [["big", "big"], ["small", "small"]];
+    const counts = level.countOptions || [["2", "2"], ["3", "3"]];
+    const places = level.placeOptions || [["on the rug", "rug"]];
+    const nos = level.noOptions || [["hat", "hat"]];
     const doors = level.doorOptions || [["blue", "blue"]];
     const tests = level.testOptions || [["a club sign", "club"]];
     const elseTests = level.elseTests || tests;
@@ -200,6 +262,25 @@
         colour: 20,
         tooltip: "Connect your instructions under this block."
       },
+      hello_wave: action("hello_wave", "wave hello", [], "Pip waves."),
+      hello_lights: action("hello_lights", "turn on the lights", [], "Pip turns the lights on."),
+      hello_grab: action("hello_grab", "pick up the %1", [dropdown("TOOL", tools)], "Pip picks up a tool."),
+      hello_sweep: action("hello_sweep", "sweep the floor", [], "Pip sweeps, if he is holding the broom."),
+      hello_water: action("hello_water", "water %1", [dropdown("TARGET", targets)], "Pip pours water on whatever you pick."),
+      job_paint: card("job_paint", "\u{1FAA7} job: paint the sign", "Put the right tool in the slot."),
+      job_sweep: card("job_sweep", "\u{1F9F9} job: sweep the floor", "Put the right tool in the slot."),
+      job_water: card("job_water", "\u{1FAB4} job: water the plants", "Put the right tool in the slot."),
+      tool_broom: tool("tool_broom", "\u{1F9F9} broom", "A broom. Good for sweeping."),
+      tool_brush: tool("tool_brush", "\u{1F58C}\uFE0F paintbrush", "A paintbrush. Good for painting."),
+      tool_can: tool("tool_can", "\u{1F6BF} watering can", "A watering can. Good for plants."),
+      draw_subject: action("draw_subject", "draw a %1", [dropdown("SUBJECT", subjects)], "Pip draws this thing. Anything you leave out, Pip guesses."),
+      draw_color: action("draw_color", "make it %1", [dropdown("COLOR", colors)], "Colours the last thing Pip drew."),
+      draw_size: action("draw_size", "make it %1", [dropdown("SIZE", sizes)], "Changes the size of the last thing Pip drew."),
+      draw_count: action("draw_count", "draw %1 of them", [dropdown("COUNT", counts)], "How many of the last thing to draw."),
+      draw_place: action("draw_place", "put it %1", [dropdown("PLACE", places)], "Where the last thing goes."),
+      draw_no: action("draw_no", "no %1", [dropdown("NO", nos)], "Tells Pip what you do not want."),
+      draw_bigger: action("draw_bigger", "make only the %1 bigger", [dropdown("SUBJECT", subjects)], "Changes the size and nothing else."),
+      draw_redo: action("draw_redo", "draw it again, bigger", [], "Starts the last thing over. Pip guesses the rest again."),
       sign_words: action("sign_words", "change the words to %1", [dropdown("WORD", words)], "Changes the words and leaves stickers alone."),
       sign_repaint: action("sign_repaint", "change the sign to %1", [dropdown("WORD", words)], "Paints over the whole sign, including stickers."),
       sign_door: action("sign_door", "paint the door %1", [dropdown("COLOR", doors)], "Paints the clubhouse door."),
@@ -463,6 +544,9 @@
     return block;
   }
   function starterTree(level) {
+    if (level.starter && typeof level.starter === "object") {
+      return { type: "pip_note", next: level.starter };
+    }
     if (level.starter === true) {
       return {
         type: "pip_note",
@@ -1343,7 +1427,7 @@
       return target && !target.delivered && !target.trash && !target.shop;
     });
     const bag = inBag.length ? inBag.map((stop) => `\u{1F4E6} for ${esc(state.houses[stop.house].label)}`).join(", ") : "empty";
-    const card = state.card.map((stop) => `<span class="stop">${esc(stop.label)}</span>`).join("");
+    const card2 = state.card.map((stop) => `<span class="stop">${esc(stop.label)}</span>`).join("");
     const letters = state.letters.map((letter, index) => {
       const lines = letter.lines.map((entry, lineIndex) => {
         const hot2 = state.inLine && state.letterIndex === index && state.lineIndex === lineIndex;
@@ -1363,7 +1447,7 @@
     <div class="route-card">
       <svg class="pip-badge" viewBox="0 0 40 62" width="26" height="40" aria-hidden="true">${pip(2, 2)}</svg>
       <h3>\u{1F5FA}\uFE0F Route card</h3>
-      ${card}
+      ${card2}
       <span class="bag">\u{1F392} Pip's bag: ${bag}</span>
     </div>
     <div class="house-row">${houses}</div>

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pip's Jobs</title>
-  <link rel="stylesheet" href="common.css?v=mv9ucci0">
-  <link rel="stylesheet" href="games.css?v=mv9ucci0">
+  <link rel="stylesheet" href="common.css?v=mvayyflu">
+  <link rel="stylesheet" href="games.css?v=mvayyflu">
 </head>
 <body class="hub-page">
   <main class="hub">
@@ -19,30 +19,50 @@
     <p class="hub-intro">Pip is a little helper. You do not walk the path yourself. You tell Pip what to do, then press Run and see if Pip did the job.</p>
 
     <ol class="path">
-      <li class="path-stop" data-game="sign">
-        <div class="path-badge" aria-hidden="true">🎨</div>
+      <li class="path-stop" data-game="hello" data-levels="6">
+        <div class="path-badge" aria-hidden="true">👋</div>
         <div class="path-card">
           <p class="path-step">Job 1</p>
+          <h2>Hello Pip</h2>
+          <p>Meet Pip. Snap blocks together, put them in order, and fill the slots so Pip can do his first jobs.</p>
+          <p class="path-progress"></p>
+          <a class="play" href="hello.html?level=1">Play Hello Pip</a>
+        </div>
+      </li>
+      <li class="path-stop" data-game="draw" data-levels="10">
+        <div class="path-badge" aria-hidden="true">🖍️</div>
+        <div class="path-card">
+          <p class="path-step">Job 2</p>
+          <h2>Draw</h2>
+          <p>Pip draws what your note says. Whatever you leave out, Pip guesses. Say enough to get the picture right.</p>
+          <p class="path-progress"></p>
+          <a class="play" href="draw.html?level=1">Play Draw</a>
+        </div>
+      </li>
+      <li class="path-stop" data-game="sign" data-levels="10">
+        <div class="path-badge" aria-hidden="true">🎨</div>
+        <div class="path-card">
+          <p class="path-step">Job 3</p>
           <h2>Sign</h2>
           <p>Write the note that tells Pip what to paint. A sloppy note changes things you wanted left alone.</p>
           <p class="path-progress"></p>
           <a class="play" href="sign.html?level=1">Play Sign</a>
         </div>
       </li>
-      <li class="path-stop" data-game="stamps">
+      <li class="path-stop" data-game="stamps" data-levels="10">
         <div class="path-badge" aria-hidden="true">📋</div>
         <div class="path-card">
-          <p class="path-step">Job 2</p>
+          <p class="path-step">Job 4</p>
           <h2>Stamps</h2>
           <p>Pip already made some changes. Stamp yes on the ones you want, and put the rest back.</p>
           <p class="path-progress"></p>
           <a class="play" href="stamps.html?level=1">Play Stamps</a>
         </div>
       </li>
-      <li class="path-stop" data-game="route">
+      <li class="path-stop" data-game="route" data-levels="10">
         <div class="path-badge" aria-hidden="true">📦</div>
         <div class="path-card">
-          <p class="path-step">Job 3</p>
+          <p class="path-step">Job 5</p>
           <h2>Route</h2>
           <p>Deliver the packages on your route card. Some letters try to give Pip new orders.</p>
           <p class="path-progress"></p>
@@ -58,12 +78,12 @@
   </main>
   <script>
     (function () {
-      var TOTAL = 10;
       var stops = document.querySelectorAll('.path-stop');
       var markedNext = false;
       for (var i = 0; i < stops.length; i++) {
         var stop = stops[i];
         var id = stop.getAttribute('data-game');
+        var TOTAL = Number(stop.getAttribute('data-levels')) || 10;
         var done = 0;
         try {
           var raw = JSON.parse(localStorage.getItem('pip:' + id + ':cleared') || '[]');

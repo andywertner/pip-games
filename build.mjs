@@ -8,7 +8,7 @@ const TARGET = 'chrome96';
 await mkdir('generated', {recursive: true});
 
 await build({
-  entryPoints: ['sign.mjs', 'stamps.mjs', 'route.mjs'],
+  entryPoints: ['hello.mjs', 'draw.mjs', 'sign.mjs', 'stamps.mjs', 'route.mjs'],
   bundle: true,
   format: 'iife',
   target: TARGET,
@@ -26,7 +26,7 @@ console.log('generated/blockly.js written for', TARGET);
 // GitHub Pages caches files for 10 minutes. A fresh version on every link keeps
 // a new page from pairing with an old stylesheet or script.
 const version = Date.now().toString(36);
-for (const page of ['index.html', 'sign.html', 'stamps.html', 'route.html']) {
+for (const page of ['index.html', 'hello.html', 'draw.html', 'sign.html', 'stamps.html', 'route.html']) {
   const html = await readFile(page, 'utf8');
   const stamped = html.replace(
       /(href|src)="((?:common|games)\.css|generated\/[a-z]+\.js)(?:\?v=[^"]*)?"/g,

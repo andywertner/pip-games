@@ -248,6 +248,45 @@ button.level_locked {
   display: block;
   border-radius: 8px;
 }
+/* Hello Pip: the wave bobs once per run. */
+.wave {
+  transform-origin: 188px 100px;
+  animation: wave-hand 0.5s ease-in-out 3;
+}
+@keyframes wave-hand {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-24deg); }
+}
+/* Draw: the target picture beside Pip's canvas. */
+.draw-panels {
+  flex: none;
+  display: flex;
+  gap: 8px;
+}
+.draw-panel {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+}
+.draw-panel figcaption {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 3px;
+}
+.draw-panel.pip-panel figcaption {
+  color: #2d5cb8;
+}
+.draw-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 40vh;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+}
+.draw-panel.pip-panel .draw-scene {
+  border-color: #4d90fe;
+}
 /* Chat sidebar: a small nod to agent chat panes. */
 #chat {
   flex: 0 0 230px;

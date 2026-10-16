@@ -1,7 +1,7 @@
 {
   "name": "pip-games",
   "private": true,
-  "description": "Sign, Stamps, and Route: Blockly games about working with an AI helper. Built for Chrome 96+ so school Chromebooks on Chrome 103 can run them.",
+  "description": "Hello Pip, Draw, Sign, Stamps, and Route: Blockly games about working with an AI helper. Built for Chrome 96+ so school Chromebooks on Chrome 103 can run them.",
   "scripts": {
     "build": "node build.mjs",
     "test": "node --test test/games.test.mjs"

@@ -229,6 +229,9 @@ function realize(workspace, spec) {
 }
 
 function starterTree(level) {
+  if (level.starter && typeof level.starter === 'object') {
+    return {type: 'pip_note', next: level.starter};
+  }
   if (level.starter === true) {
     return {
       type: 'pip_note',
